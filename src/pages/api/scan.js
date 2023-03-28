@@ -35,7 +35,10 @@ export default async function handler(req, res) {
       .get()
       .filter(
         (href) =>
-          href && href.includes(host) && !nonPages.includes(href.split(".")[1])
+          href &&
+          href.includes(host) &&
+          !nonPages.includes(href.split(".")[1]) &&
+          !href.includes("mailto")
       );
 
     return pickTopLinks(links, 5);
