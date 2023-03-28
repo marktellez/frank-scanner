@@ -73,5 +73,9 @@ export default async function handler(req, res) {
     )
   );
 
-  res.status(200).json({ text: text.replace(/\\n/, "").replace(/\\t/, "") });
+  let jsRegex = /[^\w ]/gi;
+  const specialRegex = /\n||\t/g;
+  res
+    .status(200)
+    .json({ text: text.replace(specialRegex, "").replace(jsRegex, "") });
 }
