@@ -1,5 +1,5 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { convert } from "html-to-text";
 const defaultInfo = {
   location: undefined,
   text: "",
@@ -10,7 +10,19 @@ export default function Homepage() {
   const [error, setError] = useState("");
   const [url, setUrl] = useState("");
   const [info, setInfo] = useState(defaultInfo);
+  const [statusUrl, setStatusUrl] = useState(undefined);
+  const [classifierData, setClassifierData] = useState({});
+
   const { location, text } = info;
+
+  async function classify(text) {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+
+    return await res.json();
+  }
 
   async function scan() {
     setBusy(true);
@@ -18,15 +30,39 @@ export default function Homepage() {
     setError("");
 
     const response = await fetch(`/api/scan?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
 
-    if (data.error) {
-      setError(data.error);
-      return;
+    const { statusUrl } = await response.json();
+    setStatusUrl(statusUrl);
+  }
+
+  useEffect(() => {
+    if (!statusUrl) return;
+    pollStatus();
+  }, [statusUrl]);
+
+  async function pollStatus() {
+    try {
+      console.dir("polling");
+      const res = await fetch(
+        "/api/status?statusUrl=" + encodeURIComponent(statusUrl)
+      );
+
+      const data = await res.json();
+
+      if (data.error) return;
+
+      if (data.status === "finished" && data.response.body) {
+        setBusy(false);
+        setStatusUrl(undefined);
+        const classification = await classify(data.response.body);
+        console.dir({ classification });
+        setClassifierData(classification);
+      } else {
+        setTimeout(pollStatus, 1000);
+      }
+    } catch (err) {
+      console.error(err);
     }
-
-    setInfo(data);
-    setBusy(false);
   }
 
   return (
@@ -44,22 +80,25 @@ export default function Homepage() {
             onClick={scan}
             className="bg-pink-500 text-white font-semibold shadow-md rounded py-1 px-5 flex items-center justify-center w-full text-sm">
             {busy ? (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20">
-                <circle
-                  className="opacity-25"
-                  cx="10"
-                  cy="10"
-                  r="8"
-                  stroke="currentColor"
-                  strokeWidth="4"></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 10a6 6 0 0 1 12 0c0 3.31-2.69 6-6 6s-6-2.69-6-6"></path>
-              </svg>
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20">
+                  <circle
+                    className="opacity-25"
+                    cx="10"
+                    cy="10"
+                    r="8"
+                    stroke="currentColor"
+                    strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 10a6 6 0 0 1 12 0c0 3.31-2.69 6-6 6s-6-2.69-6-6"></path>
+                </svg>{" "}
+                working...
+              </>
             ) : (
               <>Scan</>
             )}
@@ -67,11 +106,8 @@ export default function Homepage() {
         </div>
       </div>
       {error ? <div>{error}</div> : ""}
-      {info.text.length ? (
-        <textarea
-          value={info.text}
-          className="w-full min-h-[200px] border border-gray-200 text-gray-800  rounded-xl"
-        />
+      {classifierData ? (
+        <pre>{JSON.stringify(classifierData, null, 2)}</pre>
       ) : (
         ""
       )}

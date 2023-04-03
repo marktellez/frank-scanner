@@ -1,0 +1,35 @@
+{
+  "requestsFinished": 0,
+  "requestsFailed": 0,
+  "requestsRetries": 0,
+  "requestsFailedPerMinute": 0,
+  "requestsFinishedPerMinute": 0,
+  "requestMinDurationMillis": null,
+  "requestMaxDurationMillis": 0,
+  "requestTotalFailedDurationMillis": 0,
+  "requestTotalFinishedDurationMillis": 0,
+  "crawlerStartedAt": "2023-03-29T17:23:27.946Z",
+  "crawlerFinishedAt": "2023-03-29T17:24:41.944Z",
+  "statsPersistedAt": "2023-03-29T17:24:41.944Z",
+  "crawlerRuntimeMillis": 74254,
+  "crawlerLastStartTimestamp": 1680110607690,
+  "requestRetryHistogram": [],
+  "statsId": 0,
+  "requestAvgFailedDurationMillis": null,
+  "requestAvgFinishedDurationMillis": null,
+  "requestTotalDurationMillis": 0,
+  "requestsTotal": 0,
+  "requestsWithStatusCode": {},
+  "errors": {},
+  "retryErrors": {
+    "/home/mark/dev/frankthetank/scraper/node_modules/@crawlee/playwright/internals/utils/playwright-utils.js:153:17": {
+      "missing error code": {
+        "Error": {
+          "page.goto: net::ERR_EMPTY_RESPONSE at https://allieddomecq.com/": {
+            "count": 3
+          }
+        }
+      }
+    }
+  }
+}
