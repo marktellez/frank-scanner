@@ -6,7 +6,7 @@ async function classifyText(text) {
       cors: "no-cors",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Token ${process.env.PUBLIC_UCLASSIFY_READ_KEY}`,
+        Authorization: `Token ${process.env.UCLASSIFY_READ_KEY}`,
       },
       body: JSON.stringify({ texts: [text] }),
     }
