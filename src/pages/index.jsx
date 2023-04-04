@@ -106,8 +106,24 @@ export default function Homepage() {
         </div>
       </div>
       {error ? <div>{error}</div> : ""}
-      {classifierData ? (
-        <pre>{JSON.stringify(classifierData, null, 2)}</pre>
+      {classifierData[0]?.classification ? (
+        <pre>
+          {JSON.stringify(
+            classifierData[0].classification
+              .map(({ className, p }) => ({
+                classification: className,
+                percent: parseInt(p * 100),
+              }))
+              .sort((a, b) => b.percent - a.percent)
+              .slice(0, 3)
+              .map(({ classification, percent }) => ({
+                [classification]: `${percent}%`,
+              })),
+
+            null,
+            2
+          )}
+        </pre>
       ) : (
         ""
       )}
