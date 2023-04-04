@@ -106,7 +106,7 @@ export default function Homepage() {
         </div>
       </div>
       {error ? <div>{error}</div> : ""}
-      {classifierData[0]?.classification ? (
+      {!busy && classifierData[0]?.classification ? (
         <pre>
           {JSON.stringify(
             classifierData[0].classification
