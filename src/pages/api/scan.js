@@ -1,25 +1,3 @@
-const nonPages = [
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "bmp",
-  "svg",
-  "webp",
-  "ico",
-  "mp3",
-  "wav",
-  "ogg",
-  "mp4",
-  "webm",
-  "flv",
-  "avi",
-  "mov",
-  "wmv",
-  "mkv",
-  "js",
-];
-
 export default async function handler(req, res) {
   function ensureAbsolute(url) {
     return url.startsWith("http") ? url : `https://${url}`;
@@ -36,6 +14,9 @@ export default async function handler(req, res) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      apiParams: {
+        render: true,
+      },
       apiKey,
       url: baseUrl,
     }),

@@ -1,19 +1,14 @@
 import { useState, useEffect } from "react";
 import { convert } from "html-to-text";
-const defaultInfo = {
-  location: undefined,
-  text: "",
-};
 
 export default function Homepage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [url, setUrl] = useState("");
-  const [info, setInfo] = useState(defaultInfo);
+
   const [statusUrl, setStatusUrl] = useState(undefined);
   const [classifierData, setClassifierData] = useState({});
-
-  const { location, text } = info;
+  const [text, setText] = useState("");
 
   async function classify(text) {
     const res = await fetch("/api/classify", {
@@ -26,7 +21,7 @@ export default function Homepage() {
 
   async function scan() {
     setBusy(true);
-    setInfo(defaultInfo);
+    setText("");
     setError("");
 
     const response = await fetch(`/api/scan?url=${encodeURIComponent(url)}`);
@@ -49,13 +44,21 @@ export default function Homepage() {
 
       const data = await res.json();
 
-      if (data.error) return;
+      if (data.error) return setError(error);
 
       if (data.status === "finished" && data.response.body) {
         setBusy(false);
         setStatusUrl(undefined);
-        const classification = await classify(data.response.body);
-        console.dir({ classification });
+
+        const combined =
+          data.response.body.match(/\<title\>(.*)\<\/title\>/)[1] +
+          data.response.body.match(
+            /<meta\s+name="description"\s+content="(.*?)"/
+          )[1];
+
+        setText(combined);
+
+        const classification = await classify(combined);
         setClassifierData(classification);
       } else {
         setTimeout(pollStatus, 1000);
@@ -71,6 +74,7 @@ export default function Homepage() {
         <div>
           <div className="text-xl">Enter a url to scan</div>
           <input
+            disabled={busy}
             className="outline-none py-1 px-2 text-center text-sm text-gray-700"
             type="text"
             value={url}
@@ -127,6 +131,7 @@ export default function Homepage() {
       ) : (
         ""
       )}
+      {!busy && text.length ? <pre>{text}</pre> : ""}
     </div>
   );
 }

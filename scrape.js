@@ -1,22 +1,30 @@
-(async () => {
-  const { chromium } = require("playwright");
+const webdriver = require("selenium-webdriver");
+const chrome = require("selenium-webdriver/chrome");
 
-  // Open a Chromium browser. We use headless: false
-  // to be able to watch the browser window.
-  const browser = await chromium.launch({
-    headless: false,
-    args: ["--no-sandbox", "--no-zygote"],
-  });
+// Set up options for ChromeDriver
+const options = new chrome.Options();
+options.addArguments("--no-sandbox");
+options.addArguments("--disable-dev-shm-usage");
 
-  // Open a new page / tab in the browser.
-  const page = await browser.newPage();
+// Set up the driver
+const driver = new webdriver.Builder()
+  .forBrowser("chrome")
+  .setChromeOptions(options)
+  .build();
 
-  // Tell the tab to navigate to the JavaScript topic page.
-  await page.goto("https://allieddomecq.com/");
+// Navigate to the site
+driver.get("https://www.loblaws.ca/");
 
-  // Pause for 10 seconds, to see what's going on.
-  await page.waitForTimeout(10000);
+// Wait for the "Shop Now" button to appear
+const button = driver.wait(
+  webdriver.until.elementLocated(webdriver.By.css("span.element-cta__text")),
+  10000
+);
 
-  // Turn off the browser to clean up after ourselves.
-  await browser.close();
-})();
+// Log the button text to the console
+button.getText().then((text) => {
+  console.log(text);
+});
+
+// Quit the driver
+driver.quit();
