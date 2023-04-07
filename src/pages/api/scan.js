@@ -16,6 +16,7 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       apiParams: {
         render: true,
+        follow_redirect: true,
       },
       apiKey,
       url: baseUrl,
