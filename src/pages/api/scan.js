@@ -24,7 +24,8 @@ export default async function handler(req, res) {
   };
 
   const response = await fetch(scraperApi, options);
-  const { statusUrl } = await response.json();
 
+  const { statusUrl } = await response.json();
+  console.dir({ statusUrl });
   res.status(200).json({ statusUrl });
 }

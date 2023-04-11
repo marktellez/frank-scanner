@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { convert } from "html-to-text";
 
 export default function Homepage() {
   const [busy, setBusy] = useState(false);
@@ -49,14 +48,98 @@ export default function Homepage() {
       if (data.status === "finished" && data.response.body) {
         setBusy(false);
         setStatusUrl(undefined);
+        const titleMatch = data.response.body.match(/\<title\>(.*)\<\/title\>/);
+        const descMatch = data.response.body.match(
+          /<meta\s+name="description"\s+content="(.*?)"/
+        );
+
+        const body = new DOMParser().parseFromString(
+          data.response.body,
+          "text/html"
+        ).body.textContent;
 
         const combined =
-          data.response.body.match(/\<title\>(.*)\<\/title\>/)[1] +
-          data.response.body.match(
-            /<meta\s+name="description"\s+content="(.*?)"/
-          )[1];
+          (titleMatch ? titleMatch[1] : "") +
+          (descMatch ? descMatch[1] : "") +
+          body;
 
-        setText(combined);
+        const stopWords = [
+          "a",
+          "an",
+          "and",
+          "are",
+          "as",
+          "at",
+          "be",
+          "but",
+          "by",
+          "for",
+          "if",
+          "in",
+          "into",
+          "is",
+          "it",
+          "no",
+          "not",
+          "of",
+          "on",
+          "or",
+          "such",
+          "that",
+          "the",
+          "their",
+          "then",
+          "there",
+          "these",
+          "they",
+          "this",
+          "to",
+          "was",
+          "will",
+          "with",
+          "cdata",
+          "var",
+          "true",
+          "false",
+          "rgb",
+          "rgba",
+          "px",
+          "h",
+          "jquery",
+          "document",
+          "window",
+          "new",
+          "date",
+          "function",
+          "var",
+          "return",
+          "typeof",
+          "undefined",
+          "rem",
+          "em",
+          "load",
+          "i",
+          "body",
+          "auto",
+          "gettime",
+          "maxwidth",
+          "minwidth",
+        ];
+
+        setText(
+          combined
+            .replace(/[^a-zA-Z ]/g, "")
+            .split(" ")
+            .filter(
+              (word) =>
+                word.trim().length > 3 &&
+                word.length < 10 &&
+                !stopWords.includes(word.toLowerCase())
+            )
+            .join(" ")
+            .toLowerCase()
+            .replace(/\s{2}/g, "")
+        );
 
         const classification = await classify(combined);
         setClassifierData(classification);
@@ -111,27 +194,37 @@ export default function Homepage() {
       </div>
       {error ? <div>{error}</div> : ""}
       {!busy && classifierData[0]?.classification ? (
-        <pre>
-          {JSON.stringify(
-            classifierData[0].classification
-              .map(({ className, p }) => ({
-                classification: className,
-                percent: parseInt(p * 100),
-              }))
-              .sort((a, b) => b.percent - a.percent)
-              .slice(0, 3)
-              .map(({ classification, percent }) => ({
-                [classification]: `${percent}%`,
-              })),
+        <>
+          <h2>Classification</h2>
+          <textarea className="w-full min-h-[300px] text-black">
+            {JSON.stringify(
+              classifierData[0].classification
+                .map(({ className, p }) => ({
+                  classification: className,
+                  percent: parseInt(p * 100),
+                }))
+                .sort((a, b) => b.percent - a.percent)
+                .slice(0, 3)
+                .map(({ classification, percent }) => ({
+                  [classification]: `${percent}%`,
+                })),
 
-            null,
-            2
-          )}
-        </pre>
+              null,
+              2
+            )}
+          </textarea>
+        </>
       ) : (
         ""
       )}
-      {!busy && text.length ? <pre>{text}</pre> : ""}
+      {!busy && text.length > 0 && (
+        <>
+          <h2>Text</h2>
+          <textarea className="w-full min-h-[300px] text-black">
+            {text}
+          </textarea>
+        </>
+      )}
     </div>
   );
 }
