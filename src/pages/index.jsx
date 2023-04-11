@@ -138,7 +138,8 @@ export default function Homepage() {
             )
             .join(" ")
             .toLowerCase()
-            .replace(/\s{2}/g, "")
+            .replace(/\s+/g, " ")
+            .trim()
         );
 
         const classification = await classify(combined);
